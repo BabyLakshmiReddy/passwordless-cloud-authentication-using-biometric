@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>BioCrypt | Register</title>
+
+<style>
+
+body{
+    margin:0;
+    background:#0b0e14;
+    font-family:Arial,Helvetica,sans-serif;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+.card{
+
+    width:420px;
+    background:#1b1b1b;
+    border-radius:18px;
+    padding:30px;
+    box-shadow:0 0 30px rgba(0,0,0,.4);
+
+}
+
+h2{
+
+    text-align:center;
+    margin-bottom:8px;
+
+}
+
+.sub{
+
+    text-align:center;
+    color:#999;
+    margin-bottom:25px;
+    font-size:14px;
+
+}
+
+input,textarea{
+
+    width:100%;
+    padding:12px;
+    margin-top:12px;
+    background:#000;
+    color:white;
+    border:1px solid #444;
+    border-radius:8px;
+    box-sizing:border-box;
+    font-size:15px;
+
+}
+
+textarea{
+
+    resize:none;
+    height:90px;
+
+}
+
+button{
+
+    width:100%;
+    padding:13px;
+    margin-top:18px;
+    border:none;
+    border-radius:8px;
+    background:#6d5dfc;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    font-size:15px;
+
+}
+
+button:hover{
+
+    background:#5848e5;
+
+}
+
+#msg{
+
+    margin-top:18px;
+    text-align:center;
+    min-height:20px;
+
+}
+
+.login{
+
+    margin-top:20px;
+    text-align:center;
+    font-size:14px;
+
+}
+
+.login a{
+
+    color:#6d5dfc;
+    text-decoration:none;
+
+}
+
+.spinner{
+
+display:inline-block;
+width:14px;
+height:14px;
+border:2px solid rgba(255,255,255,.3);
+border-top:2px solid white;
+border-radius:50%;
+animation:spin .7s linear infinite;
+
+}
+
+@keyframes spin{
+
+to{
+transform:rotate(360deg);
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Create Account</h2>
+
+<div class="sub">
+
+Register using your biometric identity
+
+</div>
+
+<form id="regForm">
+
+<input
+type="text"
+id="full_name"
+placeholder="Full Name"
+required>
+
+<input
+type="text"
+id="username"
+placeholder="Username"
+required>
+
+<input
+type="email"
+id="email"
+placeholder="Email Address"
+required>
+
+<textarea
+id="biometric_data"
+placeholder="Paste Biometric Data Here"
+required></textarea>
+
+<button id="regBtn">
+
+Register
+
+</button>
+
+</form>
+
+<div id="msg"></div>
+
+<div class="login">
+
+Already have an account?
+
+<a href="/login_page">
+
+Login
+
+</a>
+
+</div>
+
+</div>
+<script>
+
+const $ = id => document.getElementById(id);
+
+document.getElementById("regForm").onsubmit = async function(e){
+
+    e.preventDefault();
+
+    const btn = $("regBtn");
+    const msg = $("msg");
+
+    btn.disabled = true;
+
+    msg.style.color = "#ffffff";
+    msg.innerHTML = '<span class="spinner"></span> Registering...';
+
+    try{
+
+        const response = await fetch("/register",{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+
+                full_name:$("full_name").value,
+                username:$("username").value,
+                email:$("email").value,
+                biometric_data:$("biometric_data").value
+
+            })
+
+        });
+
+        const data = await response.json();
+
+        if(data.status==="Success"){
+
+            msg.style.color="#00ff88";
+
+            msg.innerHTML=
+            "Registration Successful!<br><br>" +
+            "<b>Visual Signature</b><br>" +
+            data.visual_signature +
+            "<br><br>Redirecting...";
+
+            setTimeout(()=>{
+
+                window.location.href="/login_page";
+
+            },2500);
+
+        }
+        else{
+
+            msg.style.color="#ff4d4d";
+
+            msg.textContent=data.reason || data.status;
+
+            btn.disabled=false;
+
+        }
+
+    }
+    catch(err){
+
+        msg.style.color="#ff4d4d";
+
+        msg.textContent="Server Error : "+err.message;
+
+        btn.disabled=false;
+
+    }
+
+};
+
+</script>
+
+</body>
+</html>
